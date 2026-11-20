@@ -1,0 +1,294 @@
+https://script.google.com/macros/s/AKfycbw5SVvsTGvUosNeRFevqY2_NnM8LdC4GUh_xC639vj1iPXnZD3cVJza97WLF0AGqvfhug/exec<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Consultation — Pre-Session Questionnaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f3ee;--card:#fffdfa;--ink:#221d19;--mute:#7a6f66;--line:#e5ddd3;--acc:#8a4b2a;--acc2:#f1e4d8;--err:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:28px 18px 80px}
+h1{font:600 clamp(28px,6vw,40px)/1.15 Fraunces,Georgia,serif;margin:8px 0 10px}
+.lead{color:var(--mute);margin:0 0 20px}
+.bar{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:5}
+.bar div{height:6px;background:var(--line);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 20px;margin:16px 0}
+h2{font:600 21px Fraunces,Georgia,serif;margin:0 0 4px}
+.sub{color:var(--mute);font-size:14px;margin:0 0 14px}
+label.q{display:block;font-weight:500;margin:18px 0 6px}
+.hint{display:block;color:var(--mute);font-weight:400;font-size:13px}
+.req{color:var(--err)}
+input[type=text],input[type=number],textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;color:inherit}
+textarea{min-height:84px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--acc);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:99px;background:#fff;font-size:14px}
+.chips input:checked+span{background:var(--acc);border-color:var(--acc);color:#fff}
+.chips input:focus-visible+span{outline:2px solid var(--acc);outline-offset:2px}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:16px;text-align:center;background:#fff;cursor:pointer}
+.drop:hover,.drop:focus{border-color:var(--acc);outline:0}
+.drop b{display:block}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-top:10px}
+.thumbs div{position:relative}
+.thumbs img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
+.thumbs button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;padding:0;font-size:15px;line-height:1;background:rgba(34,29,25,.75);color:#fff}
+.tip{background:var(--acc2);border-radius:12px;padding:12px 14px;font-size:14px;margin:10px 0}
+.tip ul{margin:6px 0 0;padding-left:18px}
+button{font:600 16px Inter;border:0;border-radius:12px;padding:14px 20px;background:var(--acc);color:#fff;cursor:pointer;width:100%}
+button:disabled{opacity:.6;cursor:default}
+button.ghost{background:transparent;color:var(--acc);border:1px solid var(--acc);margin-top:10px}
+.note{font-size:13px;color:var(--mute);margin-top:8px}
+.opt{font-size:12px;color:var(--mute);font-weight:400}
+.bad{outline:2px solid var(--err);outline-offset:4px;border-radius:10px}
+#msg{margin-top:14px;font-size:15px}
+#msg.err{color:var(--err)}
+.done{text-align:center;padding:40px 20px}
+.done h2{font-size:28px}
+#fallback{display:none}
+#sum{width:100%;min-height:240px;font:13px/1.5 ui-monospace,Menlo,monospace}
+.prog{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:12px;display:none}
+.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+.hp{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="bar"><div><i id="pg"></i></div></div>
+  <h1>Let's get to know you</h1>
+  <p class="lead">This takes about 10–15 minutes and helps us make the most of our 1-hour session. There are no wrong answers — skip anything you're not comfortable sharing. Fields marked <span class="req">*</span> are required.</p>
+  <form id="f" autocomplete="off" novalidate></form>
+  <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+  <section id="finish">
+    <h2>Send it over</h2>
+    <p class="sub">Photos are resized on your phone before upload, so this is quick even on mobile data.</p>
+    <button type="button" id="go">Submit my questionnaire</button>
+    <div class="prog" id="prog"><i></i></div>
+    <div id="msg" role="status"></div>
+    <div id="fallback">
+      <p class="note">Couldn't submit automatically. Please copy your answers below and send them to me in a message, along with your photos.</p>
+      <textarea id="sum" readonly></textarea>
+      <button type="button" class="ghost" id="copy">Copy answers</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ===== CONFIG ===== */
+// Paste your Google Apps Script web app URL (ends in /exec). Leave empty to test the form without sending.
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbw5SVvsTGvUosNeRFevqY2_NnM8LdC4GUh_xC639vj1iPXnZD3cVJza97WLF0AGqvfhug/exec";
+const MAX_SIDE = 1600, JPEG_Q = 0.82;
+
+/* ===== QUESTIONS ===== */
+const S = [
+ {t:"About you", s:"The basics.", q:[
+  {id:"name",l:"Your name",k:"text",req:1},
+  {id:"age",l:"Age",k:"number",req:1},
+  {id:"city",l:"City & climate you dress for",k:"text",h:"e.g. Chennai — hot & humid; or travelling between cities"},
+  {id:"work",l:"What do you do?",k:"text",h:"Your work or daily routine affects what clothes need to do for you"}]},
+ {t:"Your goals", s:"What brings you here.", q:[
+  {id:"why",l:"Why are you booking a styling session now?",k:"area",req:1},
+  {id:"focus",l:"What do you want help with?",k:"chips",o:["Everyday wardrobe","Work / professional","A specific event","Wardrobe edit & declutter","Shopping guidance","Finding my personal style","Colours that suit me","Confidence boost","Occasion / wedding","Travel capsule"]},
+  {id:"event",l:"Is there an upcoming event or deadline?",k:"text",h:"Date, dress code, venue — if any",opt:1},
+  {id:"win",l:"After this hour, what would make you say \"that was worth it\"?",k:"area"}]},
+ {t:"Your style", s:"Taste first, rules later.", q:[
+  {id:"words",l:"Pick words you'd like your style to say",k:"chips",o:["Classic","Minimal","Bold","Relaxed","Polished","Edgy","Romantic","Sporty","Traditional / ethnic","Playful","Earthy","Modern"]},
+  {id:"love",l:"What do you currently love wearing — and why?",k:"area"},
+  {id:"hate",l:"What do you avoid or dislike wearing?",k:"area",h:"Cuts, fabrics, colours, patterns, anything"},
+  {id:"colors",l:"Colours you feel good in / avoid",k:"text"},
+  {id:"ethnic",l:"How do you balance Western and traditional wear?",k:"chips",o:["Mostly Western","Mostly traditional","A mix of both","Depends on the occasion","I wear one, but I'm willing to try the other"],one:1},
+  {id:"ethnic_now",l:"What do you wear now?",k:"text",cond:["ethnic","I wear one, but I'm willing to try the other"],h:"Western or traditional, and which one you'd like to try"},
+  {id:"icons",l:"Style inspirations",k:"text",h:"People, brands, Pinterest boards, characters — anything",opt:1},
+  {id:"p_inspo",l:"Inspiration images",k:"photos",max:5,h:"Up to 5 looks, people or moods you love",opt:1}]},
+ {t:"Fit & comfort", s:"Optional but helpful. Share only what you want to.", q:[
+  {id:"height",l:"Height",k:"text",opt:1,h:"e.g. 5'6\" / 168 cm"},
+  {id:"sizes",l:"Usual sizes (top / bottom / footwear)",k:"text",opt:1},
+  {id:"fitwin",l:"What do you love about how your clothes fit?",k:"area",opt:1},
+  {id:"fitpain",l:"What frustrates you about fit?",k:"area",opt:1,h:"e.g. trousers gap at waist, sleeves too short, shirts pull across shoulders"},
+  {id:"comfort",l:"Any comfort or sensory needs?",k:"text",opt:1,h:"Fabrics that itch, heels you can't wear, modesty preferences, etc."}]},
+ {t:"Your wardrobe today", s:"A quick honest picture.", q:[
+  {id:"size",l:"How does your wardrobe feel?",k:"chips",o:["Too full, nothing to wear","Too small / basic","Balanced but boring","Don't know where to start"],one:1},
+  {id:"staples",l:"Your go-to pieces you wear on repeat",k:"area"},
+  {id:"p_feel",l:"Outfits you feel great in",k:"photos",max:6,h:"Your go-to looks — wear them and snap a full-length photo, or lay them flat on a bed. Up to 6."},
+  {id:"dislike",l:"Outfits or pieces you don't like how you look in",k:"area",h:"What bothers you about them?"},
+  {id:"p_dislike",l:"Photos of those outfits",k:"photos",max:6,h:"Up to 6 — this helps me see what's not working so we can fix it.",opt:1},
+  {id:"unworn",l:"Things you own but never wear — and why",k:"area"},
+  {id:"gaps",l:"What do you feel you're missing?",k:"area",opt:1},
+  {id:"week",l:"A typical week: how many days work / casual / social?",k:"text",h:"e.g. 4 office, 2 casual, 1 social"}]},
+ {t:"Shopping & budget", s:"So recommendations are realistic.", q:[
+  {id:"budget",l:"Comfortable budget for new pieces (per month or total)",k:"text"},
+  {id:"where",l:"Where do you shop?",k:"chips",o:["Online","Malls / brand stores","Local markets","Tailor / custom","Thrift / pre-loved","Boutiques"]},
+  {id:"brands",l:"Brands you like or buy often",k:"text",opt:1},
+  {id:"values",l:"Anything important to you when shopping?",k:"chips",o:["Sustainable","Made in India","Durable / investment","Budget-friendly","Trendy","Versatile"]}]},
+ {t:"Photos of you", s:"Photos let us start working right away instead of spending the call on basics.", tip:"Natural daylight, plain background, no filters. Fitted clothes (leggings / fitted tee or similar) work best for full-length shots.", q:[
+  {id:"p_body",l:"Full-length photos: front, side and back",k:"photos",max:3,h:"3 photos, standing straight, head to toe",opt:1},
+  {id:"p_face",l:"Face close-up",k:"photos",max:1,h:"Clear, no filters, hair off the face if possible",opt:1}]},
+ {t:"Before we meet", s:"Last few things.", q:[
+  {id:"tools",l:"Can you share your screen or hold up clothes on camera during the call?",k:"chips",o:["Yes, easily","I can try","Prefer not to"],one:1},
+  {id:"note",l:"Anything else I should know?",k:"area",opt:1}]},
+ {t:"Consent & permissions", s:"Your photos and answers are private. These choices are yours to make and you can change your mind at any time.", q:[
+  {id:"c_use",l:"Use of my information",k:"chips",req:1,one:1,o:["I agree my photos and answers will only be used to prepare for and run my styling session, and I can ask for them to be deleted at any time."]},
+  {id:"c_media",l:"May I post photos or videos from our session?",k:"chips",req:1,one:1,h:"For example on social media, the Knowear app or website, as examples of my work.",o:["Yes, including my face","Yes, but keep me anonymous (no face, no name)","No, keep everything private"]},
+  {id:"c_review",l:"May I share your feedback / review of the session as a testimonial?",k:"chips",one:1,o:["Yes, with my name","Yes, anonymously","No"]}]}
+];
+const REQ = S.flatMap(s=>s.q).filter(q=>q.req).map(q=>q.id);
+
+/* ===== RENDER ===== */
+const f=document.getElementById("f");
+const P={}; // photo state: id -> [dataURL,...]
+S.forEach((sec,i)=>{
+  const s=document.createElement("section");
+  s.innerHTML=`<h2>${i+1}. ${sec.t}</h2><p class="sub">${sec.s}</p>`+(sec.tip?`<div class="tip">${sec.tip}</div>`:"");
+  sec.q.forEach(q=>{
+    const w=document.createElement("div");w.dataset.q=q.id;if(q.cond)w.style.display="none";
+    const lab=`<label class="q" ${q.k==="photos"||q.k==="chips"?"":`for="${q.id}"`}>${q.l}${q.req?' <span class="req">*</span>':''}${q.opt?' <span class="opt">(optional)</span>':''}${q.h?`<span class="hint">${q.h}</span>`:''}</label>`;
+    let inp="";
+    if(q.k==="text")inp=`<input type="text" id="${q.id}" name="${q.id}">`;
+    if(q.k==="number")inp=`<input type="number" inputmode="numeric" min="10" max="100" id="${q.id}" name="${q.id}">`;
+    if(q.k==="area")inp=`<textarea id="${q.id}" name="${q.id}"></textarea>`;
+    if(q.k==="chips")inp=`<div class="chips" role="group">`+q.o.map(o=>`<label><input type="${q.one?'radio':'checkbox'}" name="${q.id}" value="${o.replace(/"/g,'&quot;')}"><span>${o}</span></label>`).join("")+`</div>`;
+    if(q.k==="photos"){P[q.id]=[];inp=`<div class="drop" tabindex="0" role="button"><b>Tap to add photos</b><span class="note">Up to ${q.max}</span></div><input type="file" accept="image/*" multiple hidden><div class="thumbs"></div>`;}
+    w.innerHTML=lab+inp;s.appendChild(w);
+    if(q.k==="photos")wirePhotos(w,q);
+  });
+  f.appendChild(s);
+});
+
+/* ===== PHOTOS ===== */
+async function shrink(file){
+  let src,w,h;
+  if(window.createImageBitmap){const b=await createImageBitmap(file);src=b;w=b.width;h=b.height}
+  else{src=await new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=no;im.src=URL.createObjectURL(file)});w=src.naturalWidth;h=src.naturalHeight}
+  const k=Math.min(1,MAX_SIDE/Math.max(w,h)),c=document.createElement("canvas");
+  c.width=Math.round(w*k);c.height=Math.round(h*k);
+  c.getContext("2d").drawImage(src,0,0,c.width,c.height);
+  return c.toDataURL("image/jpeg",JPEG_Q);
+}
+function wirePhotos(w,q){
+  const drop=w.querySelector(".drop"),inp=w.querySelector("input[type=file]"),th=w.querySelector(".thumbs");
+  const redraw=()=>{
+    th.innerHTML="";
+    P[q.id].forEach((d,i)=>{
+      const x=document.createElement("div");
+      x.innerHTML=`<img alt="Photo ${i+1}" src="${d}"><button type="button" aria-label="Remove photo ${i+1}">×</button>`;
+      x.querySelector("button").onclick=()=>{P[q.id].splice(i,1);redraw();prog()};
+      th.appendChild(x);
+    });
+  };
+  const add=async files=>{
+    for(const file of [...files].filter(x=>x.type.startsWith("image/")||/\.(heic|heif)$/i.test(x.name))){
+      if(P[q.id].length>=q.max){break}
+      try{P[q.id].push(await shrink(file))}catch(e){setMsg("Couldn't read “"+file.name+"”. Try a JPG or PNG version.",1)}
+    }
+    redraw();prog();inp.value="";
+  };
+  drop.onclick=()=>inp.click();
+  drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();inp.click()}};
+  ["dragover","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();if(ev==="drop")add(e.dataTransfer.files)}));
+  inp.onchange=()=>add(inp.files);
+}
+
+/* ===== VALUES, PROGRESS, DRAFT ===== */
+function val(id){
+  const els=f.querySelectorAll(`[name="${id}"]`);
+  if(!els.length)return "";
+  if(els[0].type==="checkbox"||els[0].type==="radio")return [...els].filter(e=>e.checked).map(e=>e.value).join(", ");
+  return els[0].value.trim();
+}
+const QS=S.flatMap(s=>s.q);
+const shown=q=>!q.cond||val(q.cond[0])===q.cond[1];
+function updateCond(){QS.filter(q=>q.cond).forEach(q=>{f.querySelector(`[data-q="${q.id}"]`).style.display=shown(q)?"":"none"})}
+function prog(){
+  const n=QS.filter(q=>q.k==="photos"?P[q.id].length:val(q.id)).length;
+  document.getElementById("pg").style.width=Math.round(n/QS.length*100)+"%";
+  try{localStorage.setItem("intake_draft",JSON.stringify(Object.fromEntries(QS.filter(q=>q.k!=="photos").map(q=>[q.id,val(q.id)]))))}catch(e){}
+}
+f.addEventListener("input",prog);f.addEventListener("change",()=>{updateCond();prog()});
+try{
+  const d=JSON.parse(localStorage.getItem("intake_draft")||"{}");
+  Object.entries(d).forEach(([id,v])=>{
+    if(!v)return;
+    const els=f.querySelectorAll(`[name="${id}"]`);if(!els.length)return;
+    if(els[0].type==="checkbox"||els[0].type==="radio"){els.forEach(e=>e.checked=v.split(", ").includes(e.value)||v===e.value)}
+    else els[0].value=v;
+  });updateCond();prog();
+}catch(e){}
+
+/* ===== SUBMIT ===== */
+const msg=document.getElementById("msg"),go=document.getElementById("go"),bar=document.getElementById("prog");
+function setMsg(t,err){msg.textContent=t;msg.className=err?"err":""}
+function setBar(p){bar.style.display="block";bar.firstElementChild.style.width=Math.round(p*100)+"%"}
+async function post(obj){
+  const r=await fetch(ENDPOINT,{method:"POST",body:JSON.stringify(obj)}); // no custom headers = no CORS preflight
+  const j=await r.json();if(!j.ok)throw new Error(j.error||"Server error");return j;
+}
+function fields(){
+  return QS.map(q=>({label:q.l,value:q.k==="photos"?(P[q.id].length?P[q.id].length+" photo(s) uploaded":""):(shown(q)?val(q.id):"")}));
+}
+function summary(){
+  let t="STYLING CONSULTATION — PRE-SESSION FORM\n";
+  S.forEach(sec=>{t+=`\n## ${sec.t.toUpperCase()}\n`;sec.q.filter(shown).forEach(q=>{
+    const v=q.k==="photos"?(P[q.id].length?P[q.id].length+" photo(s) — sending separately":""):val(q.id);
+    t+=`${q.l}\n→ ${v||"—"}\n`})});
+  return t;
+}
+function showFallback(){
+  document.getElementById("sum").value=summary();
+  document.getElementById("fallback").style.display="block";
+}
+document.getElementById("copy").onclick=async e=>{
+  const ta=document.getElementById("sum");
+  try{await navigator.clipboard.writeText(ta.value);e.target.textContent="Copied ✓"}
+  catch(_){ta.select();e.target.textContent="Press Ctrl/Cmd+C to copy"}
+};
+function validate(){
+  f.querySelectorAll(".bad").forEach(x=>x.classList.remove("bad"));
+  const miss=REQ.filter(id=>!val(id));
+  miss.forEach(id=>f.querySelector(`[data-q="${id}"]`).classList.add("bad"));
+  if(miss.length){
+    f.querySelector(`[data-q="${miss[0]}"]`).scrollIntoView({behavior:"smooth",block:"center"});
+    setMsg("Please complete the fields marked * (highlighted above).",1);return false;
+  }
+  return true;
+}
+let sess=null,queue=[];
+async function sendQueue(){
+  const total=queue.length;
+  for(let i=0;i<total;i++){
+    const it=queue[i];if(it.ok)continue;
+    setMsg(`Uploading photo ${i+1} of ${total}…`);
+    for(let a=0;a<2&&!it.ok;a++){
+      try{await post({action:"photo",folderId:sess.folderId,group:it.group,n:it.n,data:it.data});it.ok=true}catch(e){}
+    }
+    setBar((i+1)/total);
+  }
+  const failed=queue.filter(x=>!x.ok).length;
+  if(failed){setMsg(`${failed} photo(s) didn't upload. Tap the button to retry.`,1);go.textContent="Retry photo upload";go.disabled=false;return}
+  try{await post({action:"done",id:sess.id,folderId:sess.folderId,photos:total})}catch(e){}
+  document.getElementById("app").innerHTML=`<section class="done"><h2>Thank you${val("name")?"":""}! 🎉</h2><p>I've received your questionnaire and photos. I'll review everything before our session. See you soon!</p></section>`;
+  try{localStorage.removeItem("intake_draft")}catch(e){}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+go.onclick=async()=>{
+  if(document.getElementById("hp").value)return;
+  if(sess){go.disabled=true;return sendQueue()}
+  if(!validate())return;
+  if(!ENDPOINT){setMsg("Preview mode: no endpoint is configured, so nothing was sent.",1);showFallback();return}
+  go.disabled=true;setMsg("Sending your answers…");
+  try{
+    sess=await post({action:"submit",name:val("name"),fields:fields(),hp:document.getElementById("hp").value});
+  }catch(e){
+    setMsg("Couldn't reach the server — please use the copy option below.",1);showFallback();go.disabled=false;return;
+  }
+  QS.filter(q=>q.k==="photos").forEach(q=>P[q.id].forEach((d,i)=>queue.push({group:q.id.replace(/^p_/,""),n:i+1,data:d})));
+  await sendQueue();
+};
+</script>
+</body>
+</html>
